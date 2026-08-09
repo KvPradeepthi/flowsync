@@ -76,6 +76,7 @@ export default function AdminDashboard() {
         description: name,
         price: Number(price),
         stockQuantity: Number(stock),
+        reorderLevel: 10,
         sku,
         category: 'General',
         warehouseLocation: 'WH-A1'

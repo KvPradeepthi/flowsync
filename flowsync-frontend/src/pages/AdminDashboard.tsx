@@ -61,6 +61,31 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleAddProduct = async () => {
+    const name = prompt('Enter product name:');
+    if (!name) return;
+    const price = prompt('Enter product price ($):', '99.99');
+    if (!price || isNaN(Number(price))) return;
+    const stock = prompt('Enter initial stock quantity:', '100');
+    if (!stock || isNaN(Number(stock))) return;
+    const sku = 'SKU-' + Math.floor(Math.random() * 10000);
+
+    try {
+      await productService.create({
+        name,
+        description: name,
+        price: Number(price),
+        stockQuantity: Number(stock),
+        sku,
+        category: 'General',
+        warehouseLocation: 'WH-A1'
+      });
+      fetchData();
+    } catch (err) {
+      alert('Failed to add product');
+    }
+  };
+
   return (
     <div className="container page">
       <div className="flex items-center justify-between mb-3">
@@ -107,6 +132,7 @@ export default function AdminDashboard() {
             <div className="card">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="section-title" style={{ marginBottom: 0 }}>Inventory Management</h3>
+                <button className="btn btn-sm btn-primary" onClick={handleAddProduct}>+ Add Product</button>
               </div>
               <div className="table-wrap">
                 <table className="table">

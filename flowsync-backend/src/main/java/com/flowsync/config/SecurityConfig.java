@@ -55,6 +55,11 @@ public class SecurityConfig {
 
                 // Admin-only endpoints
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/audit-logs/**").hasRole("ADMIN")
+
+                // Warehouse & Operations endpoints
+                .requestMatchers("/api/warehouses/**").hasAnyRole("ADMIN", "WAREHOUSE_MANAGER")
+                .requestMatchers("/api/transfers/**").hasAnyRole("ADMIN", "WAREHOUSE_MANAGER")
 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()

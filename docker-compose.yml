@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: flowsync-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: flowsync_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flowsync-network
+
+  backend:
+    build:
+      context: ./flowsync-backend
+      dockerfile: Dockerfile
+    container_name: flowsync-backend
+    restart: on-failure
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/flowsync_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - "8080:8080"
+    networks:
+      - flowsync-network
+
+  frontend:
+    build:
+      context: ./flowsync-frontend
+      dockerfile: Dockerfile
+    container_name: flowsync-frontend
+    restart: on-failure
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    networks:
+      - flowsync-network
+
+volumes:
+  mysql_data:
+
+networks:
+  flowsync-network:
+    driver: bridge

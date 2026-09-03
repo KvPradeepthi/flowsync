@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+    private final com.flowsync.service.AuditLogService auditLogService;
 
     @Override
     @Transactional
@@ -50,6 +51,18 @@ public class ProductServiceImpl implements ProductService {
                 .build();
 
         Product saved = productRepository.save(product);
+
+        auditLogService.log(
+                null,
+                "ADMIN",
+                "PRODUCT_CREATED",
+                "PRODUCT",
+                saved.getId(),
+                null,
+                "SKU=" + saved.getSku() + ", stock=" + saved.getStockQuantity(),
+                "Created product " + saved.getName()
+        );
+
         log.info("Created product: {} (SKU: {})", saved.getName(), saved.getSku());
         return ProductResponse.from(saved);
     }
@@ -119,8 +132,21 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse updateStock(Long id, int newQuantity) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
+        int oldQuantity = product.getStockQuantity();
         product.setStockQuantity(newQuantity);
         Product updated = productRepository.save(product);
+
+        auditLogService.log(
+                null,
+                "ADMIN",
+                "INVENTORY_UPDATE",
+                "PRODUCT",
+                updated.getId(),
+                "stockQuantity=" + oldQuantity,
+                "stockQuantity=" + newQuantity,
+                "Manual inventory update for " + updated.getSku()
+        );
+
         log.info("Updated stock for product id={}: {} units", id, newQuantity);
         return ProductResponse.from(updated);
     }

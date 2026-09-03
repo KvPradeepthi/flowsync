@@ -29,4 +29,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // Check SKU uniqueness (useful in service layer)
     boolean existsBySku(String sku);
+
+    /**
+     * Acquires a pessimistic write lock (SELECT ... FOR UPDATE) on the product record.
+     * Guarantees atomic stock validation and deduction during concurrent checkout.
+     */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Product p WHERE p.id = :id")
+    Optional<Product> findByIdForUpdate(@org.springframework.data.repository.query.Param("id") Long id);
 }

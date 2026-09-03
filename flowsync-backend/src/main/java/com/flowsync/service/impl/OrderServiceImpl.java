@@ -56,6 +56,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final com.flowsync.service.AuditLogService auditLogService;
 
     // ─── Place Order ────────────────────────────────────────────────────────
 
@@ -71,8 +72,8 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (OrderRequest.OrderItemRequest itemReq : request.getItems()) {
-            // 2a. Validate product exists
-            Product product = productRepository.findById(itemReq.getProductId())
+            // 2a. Validate product exists and acquire pessimistic write lock (SELECT ... FOR UPDATE)
+            Product product = productRepository.findByIdForUpdate(itemReq.getProductId())
                     .orElseThrow(() -> new ProductNotFoundException(itemReq.getProductId()));
 
             // 2b. Check stock — InsufficientStockException triggers ROLLBACK
@@ -89,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             totalAmount = totalAmount.add(subtotal);
 
-            // 2d. Deduct stock atomically inside this transaction
+            // 2d. Deduct stock atomically inside this locked transaction
             product.setStockQuantity(product.getStockQuantity() - itemReq.getQuantity());
             productRepository.save(product);
 
@@ -120,6 +121,18 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Order saved = orderRepository.save(order);
+
+        auditLogService.log(
+                user.getId(),
+                userEmail,
+                "ORDER_PLACED",
+                "ORDER",
+                saved.getId(),
+                null,
+                "TOTAL: " + totalAmount + ", STATUS: PLACED",
+                "Order #" + saved.getId() + " placed with " + orderItems.size() + " item(s)"
+        );
+
         log.info("Order #{} placed by {} — total: {}", saved.getId(), userEmail, totalAmount);
 
         return OrderResponse.from(saved);
@@ -133,11 +146,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
-        // Customers may only view their own orders
+        // Customers may only view their own orders; ADMIN and SALES can view any order
         if (!order.getUser().getEmail().equals(userEmail)) {
             User requestingUser = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException(userEmail));
-            if (requestingUser.getRole() != com.flowsync.entity.User.Role.ADMIN) {
+            if (requestingUser.getRole() != com.flowsync.entity.User.Role.ADMIN
+                    && requestingUser.getRole() != com.flowsync.entity.User.Role.SALES) {
                 throw new UnauthorizedActionException("You are not authorized to view this order");
             }
         }
@@ -172,6 +186,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
+        OrderStatus oldStatus = order.getOrderStatus();
+
         // Sync pickStatus when order is shipped
         if (newStatus == OrderStatus.SHIPPED) {
             order.setPickStatus(PickStatus.SHIPPED);
@@ -179,6 +195,18 @@ public class OrderServiceImpl implements OrderService {
 
         order.setOrderStatus(newStatus);
         Order updated = orderRepository.save(order);
+
+        auditLogService.log(
+                null,
+                "SYSTEM",
+                "ORDER_STATUS_UPDATE",
+                "ORDER",
+                updated.getId(),
+                oldStatus.name(),
+                newStatus.name(),
+                "Order status updated from " + oldStatus + " to " + newStatus
+        );
+
         log.info("Order #{} status → {}", id, newStatus);
         return OrderResponse.from(updated);
     }
@@ -202,11 +230,12 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
-        // Verify ownership (or admin)
+        // Verify ownership (or ADMIN / SALES)
         if (!order.getUser().getEmail().equals(userEmail)) {
             User requestingUser = userRepository.findByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException(userEmail));
-            if (requestingUser.getRole() != com.flowsync.entity.User.Role.ADMIN) {
+            if (requestingUser.getRole() != com.flowsync.entity.User.Role.ADMIN
+                    && requestingUser.getRole() != com.flowsync.entity.User.Role.SALES) {
                 throw new UnauthorizedActionException("You cannot cancel another user's order");
             }
         }
@@ -227,8 +256,21 @@ public class OrderServiceImpl implements OrderService {
                     item.getQuantity(), product.getName(), product.getId());
         }
 
+        OrderStatus previousStatus = order.getOrderStatus();
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order cancelled = orderRepository.save(order);
+
+        auditLogService.log(
+                null,
+                userEmail,
+                "ORDER_CANCELLED",
+                "ORDER",
+                cancelled.getId(),
+                previousStatus.name(),
+                "CANCELLED",
+                "Order #" + id + " cancelled; inventory restored"
+        );
+
         log.info("Order #{} CANCELLED — inventory restored", id);
 
         return OrderResponse.from(cancelled);

@@ -54,7 +54,7 @@ export interface AuthResponse {
   token: string;
   email: string;
   name: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: 'CUSTOMER' | 'ADMIN' | 'WAREHOUSE_MANAGER' | 'SALES';
 }
 
 export interface DashboardStats {
@@ -75,5 +75,65 @@ export interface ErrorResponse {
   status: number;
   error: string;
   message: string;
+  timestamp: string;
+}
+
+export interface Warehouse {
+  id: number;
+  code: string;
+  name: string;
+  location?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WarehouseInventory {
+  id: number;
+  warehouseId: number;
+  warehouseCode: string;
+  warehouseName: string;
+  productId: number;
+  productSku: string;
+  productName: string;
+  quantity: number;
+  reorderLevel: number;
+  rackBinLocation?: string;
+  updatedAt: string;
+}
+
+export type TransferStatus = 'PENDING' | 'APPROVED' | 'IN_TRANSIT' | 'COMPLETED' | 'CANCELLED';
+
+export interface StockTransfer {
+  id: number;
+  transferNumber: string;
+  sourceWarehouseId: number;
+  sourceWarehouseCode: string;
+  sourceWarehouseName: string;
+  destinationWarehouseId: number;
+  destinationWarehouseCode: string;
+  destinationWarehouseName: string;
+  productId: number;
+  productSku: string;
+  productName: string;
+  quantity: number;
+  status: TransferStatus;
+  requestedByEmail: string;
+  approvedByEmail?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditLog {
+  id: number;
+  userId?: number;
+  userEmail: string;
+  action: string;
+  entityType: string;
+  entityId: number;
+  oldValue?: string;
+  newValue?: string;
+  details?: string;
   timestamp: string;
 }

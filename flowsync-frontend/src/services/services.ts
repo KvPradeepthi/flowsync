@@ -63,3 +63,35 @@ export const orderService = {
 export const adminService = {
   getDashboard: () => api.get<DashboardStats>('/api/admin/dashboard'),
 };
+
+// ─── Warehouses ───────────────────────────────────────────────────────────
+
+export const warehouseService = {
+  getAll: () => api.get<import('../types').Warehouse[]>('/api/warehouses'),
+  getById: (id: number) => api.get<import('../types').Warehouse>(`/api/warehouses/${id}`),
+  create: (data: Partial<import('../types').Warehouse>) => api.post<import('../types').Warehouse>('/api/warehouses', data),
+  getInventory: (warehouseId: number) => api.get<import('../types').WarehouseInventory[]>(`/api/warehouses/${warehouseId}/inventory`),
+  updateInventory: (data: { warehouseId: number; productId: number; quantity: number; reorderLevel?: number; rackBinLocation?: string }) =>
+    api.put<import('../types').WarehouseInventory>('/api/warehouses/inventory', data),
+};
+
+// ─── Stock Transfers ──────────────────────────────────────────────────────
+
+export const transferService = {
+  getAll: () => api.get<import('../types').StockTransfer[]>('/api/transfers'),
+  getById: (id: number) => api.get<import('../types').StockTransfer>(`/api/transfers/${id}`),
+  request: (data: { sourceWarehouseId: number; destinationWarehouseId: number; productId: number; quantity: number; notes?: string }) =>
+    api.post<import('../types').StockTransfer>('/api/transfers', data),
+  approve: (id: number) => api.put<import('../types').StockTransfer>(`/api/transfers/${id}/approve`),
+  dispatch: (id: number) => api.put<import('../types').StockTransfer>(`/api/transfers/${id}/dispatch`),
+  complete: (id: number) => api.put<import('../types').StockTransfer>(`/api/transfers/${id}/complete`),
+  cancel: (id: number) => api.put<import('../types').StockTransfer>(`/api/transfers/${id}/cancel`),
+};
+
+// ─── Audit Logs ───────────────────────────────────────────────────────────
+
+export const auditLogService = {
+  getAll: () => api.get<import('../types').AuditLog[]>('/api/audit-logs'),
+  getByEntity: (entityType: string, entityId: number) =>
+    api.get<import('../types').AuditLog[]>('/api/audit-logs/entity', { params: { entityType, entityId } }),
+};

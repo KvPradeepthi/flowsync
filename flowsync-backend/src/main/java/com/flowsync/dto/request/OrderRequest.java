@@ -2,7 +2,7 @@ package com.flowsync.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,6 +14,9 @@ public class OrderRequest {
     private List<OrderItemRequest> items;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class OrderItemRequest {
         @jakarta.validation.constraints.NotNull(message = "Product ID is required")
         private Long productId;

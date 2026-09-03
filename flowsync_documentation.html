@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>FlowSync — Project Documentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 20mm 22mm 20mm;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', 'Yu Gothic', 'Meiryo', 'Hiragino Sans', sans-serif;
+    color: #24292f;
+    line-height: 1.55;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 26px;
+    padding-top: 4px;
+  }
+
+  .main-title {
+    color: #1b446a;
+    font-size: 16pt;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    line-height: 1.35;
+    letter-spacing: -0.2px;
+  }
+
+  .subtitle {
+    color: #3b6589;
+    font-size: 11.5pt;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  h2.section-title {
+    color: #1b446a;
+    font-size: 11.5pt;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1.2px solid #d0d7de;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .lang-title {
+    font-weight: 600;
+    font-size: 9.5pt;
+    color: #1b446a;
+    margin-top: 6px;
+    margin-bottom: 2px;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+    font-size: 9.5pt;
+    line-height: 1.55;
+  }
+
+  ul.bullet-list {
+    margin: 4px 0 10px 0;
+    padding-left: 20px;
+    list-style-type: disc;
+  }
+
+  ul.bullet-list li {
+    margin-bottom: 5px;
+    font-size: 9.5pt;
+    line-height: 1.5;
+  }
+
+  .flow-diagram {
+    background-color: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0 12px 0;
+    font-family: 'Consolas', 'Cascadia Code', monospace;
+    font-size: 9pt;
+    line-height: 1.5;
+    color: #24292f;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  table.tech-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  table.tech-table th {
+    background-color: #1b446a;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 7px 10px;
+    border: 1px solid #1b446a;
+  }
+
+  table.tech-table td {
+    padding: 6.5px 10px;
+    border: 1px solid #d0d7de;
+    vertical-align: middle;
+  }
+
+  table.tech-table tr:nth-child(even) td {
+    background-color: #f8fafc;
+  }
+
+  .link {
+    color: #0969da;
+    text-decoration: none;
+  }
+
+  .developer-name {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #1b446a;
+    margin-bottom: 2px;
+  }
+
+  .developer-role {
+    font-size: 9.5pt;
+    color: #4a5568;
+    margin-top: 0;
+  }
+
+  .page-break {
+    page-break-before: always;
+    break-before: always;
+  }
+
+  .keep-together {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+</style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 class="main-title">FlowSync — Integrated Order, Inventory & Warehouse<br>Management System</h1>
+    <div class="subtitle">Project Documentation</div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="keep-together">
+    <h2 class="section-title">1. Introduction / はじめに</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      FlowSync is a full-stack business web application built to manage the complete lifecycle of customer orders, product inventory, and warehouse fulfillment on a single platform. It connects the customer-facing ordering process with backend inventory control and warehouse status tracking, so that stock levels stay accurate as orders are placed and fulfilled.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      FlowSync は、顧客注文・商品在庫・倉庫出荷業務のライフサイクル全体を一つのプラットフォームで管理するために開発されたフルスタック業務アプリケーションです。顧客側の注文プロセスと、バックエンドの在庫管理・倉庫ステータス追跡を連携させることで、注文の発生と処理に応じて在庫数量を正確に保ちます。
+    </p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="keep-together">
+    <h2 class="section-title">2. Project Overview / プロジェクト概要</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      The platform allows customers to browse an active product catalog, place orders, and track order status through to delivery. Every order is validated and processed on the server: stock availability is checked, inventory is deducted transactionally, and the order total is calculated from server-side product data rather than client input. Administrators and warehouse managers manage the product catalog, monitor multi-warehouse inventory, execute inter-warehouse stock transfers, audit operational actions, and move orders through a defined fulfillment and warehouse pick/pack workflow.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      本プラットフォームでは、顧客が有効な商品カタログを閲覧し、注文を行い、配送までの注文ステータスを追跡できます。すべての注文はサーバー側で検証・処理されます。在庫の有無を確認し、トランザクション処理により在庫を減算し、注文合計はクライアントからの入力ではなくサーバー側の商品データに基づいて算出されます。管理者および倉庫担当者は商品カタログの管理、複数倉庫にまたがる在庫の監視、倉庫間在庫移動の実行、業務操作の監査ログ確認、および定義された出荷・倉庫ピッキング/梱包ワークフローに沿った注文の処理を行います。
+    </p>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="keep-together">
+    <h2 class="section-title">3. Problem Statement / 課題</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      Businesses handling both online orders and physical inventory often struggle to keep stock counts accurate in real time, leading to overselling, delayed fulfillment, and manual reconciliation between order systems and warehouse floors. FlowSync addresses this by tying order creation and inventory deduction together in a single atomic transaction with database-level locking, providing multi-warehouse stock transfer state management, maintaining an immutable audit log of all critical changes, and giving staff a clear, status-driven view of where each order stands from placement to dispatch.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      オンライン注文と実在庫の両方を扱う事業者は、リアルタイムでの在庫数の正確な把握に苦労することが多く、売り越しや出荷遅延、注文システムと倉庫現場との手作業による突合が発生しがちです。FlowSync は、注文作成と在庫減算をデータベースロックを伴う一つの原子的な処理として結び付け、複数倉庫間の在庫移動ステータス管理、すべての重要操作に対する不変の監査ログ、および注文が受付から出荷までどの段階にあるかをステータスベースで明確に確認できる仕組みを提供することで、この課題に対応します。
+    </p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="keep-together">
+    <h2 class="section-title">4. Objectives / 目的</h2>
+    <ul class="bullet-list">
+      <li><strong>English:</strong> Provide accurate, real-time inventory tracking tied to order processing<br>
+          <strong>日本語:</strong> 注文処理と連動したリアルタイムかつ正確な在庫管理を実現する</li>
+      <li><strong>English:</strong> Ensure transactional integrity and prevent overselling via pessimistic and optimistic locking<br>
+          <strong>日本語:</strong> 悲観的・楽観的ロックにより、同時注文時の売り越しを防止しトランザクションの整合性を確保する</li>
+      <li><strong>English:</strong> Support multi-warehouse logistics with structured stock transfer requests and approvals<br>
+          <strong>日本語:</strong> 承認・出荷・入荷確認を伴う構造化された複数倉庫間在庫移動ワークフローを提供する</li>
+      <li><strong>English:</strong> Guarantee enterprise traceability and compliance through immutable audit logging<br>
+          <strong>日本語:</strong> 不変の監査ログにより、在庫変更や業務操作の追跡可能性とコンプライアンスを担保する</li>
+      <li><strong>English:</strong> Give warehouse staff a clear order and pick/pack status workflow<br>
+          <strong>日本語:</strong> 倉庫スタッフに明確な注文・ピッキング/梱包ステータスのワークフローを提供する</li>
+      <li><strong>English:</strong> Support secure, role-based access control (RBAC) across administrative and operational roles<br>
+          <strong>日本語:</strong> 顧客、管理者、倉庫管理者、営業に応じた安全なロールベースアクセス制御（RBAC）を実現する</li>
+      <li><strong>English:</strong> Design the system to be cloud-deployable, containerized, and horizontally scalable<br>
+          <strong>日本語:</strong> コンテナ化され、クラウド上へのデプロイと水平スケーリングが可能なシステム設計とする</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="keep-together">
+    <h2 class="section-title">5. Key Features / 主な機能</h2>
+    <ul class="bullet-list">
+      <li><strong>English:</strong> Fine-grained Role-Based Access Control (RBAC) with <code>ADMIN</code>, <code>WAREHOUSE_MANAGER</code>, <code>SALES</code>, and <code>CUSTOMER</code> roles<br>
+          <strong>日本語:</strong> <code>ADMIN</code>、<code>WAREHOUSE_MANAGER</code>、<code>SALES</code>、<code>CUSTOMER</code> ロールに対応したきめ細やかなアクセス制御</li>
+      <li><strong>English:</strong> Multi-Warehouse Stock Transfer System with a 5-stage lifecycle (<code>PENDING</code> → <code>APPROVED</code> → <code>IN_TRANSIT</code> → <code>COMPLETED</code> / <code>CANCELLED</code>)<br>
+          <strong>日本語:</strong> 5段階のステータス遷移（<code>PENDING</code> → <code>APPROVED</code> → <code>IN_TRANSIT</code> → <code>COMPLETED</code> / <code>CANCELLED</code>）と自動在庫相殺・復元ロジックを備えた複数倉庫間在庫移動機能</li>
+      <li><strong>English:</strong> Immutable Audit Logging tracking actor, action, target entity, previous value, new value, and timestamp<br>
+          <strong>日本語:</strong> 操作者、アクション、対象エンティティ、変更前の値、変更後の値、タイムスタンプを永続記録する不変の監査ログ機能</li>
+      <li><strong>English:</strong> High-concurrency transaction management with pessimistic write locking (<code>SELECT ... FOR UPDATE</code>) and optimistic locking (<code>@Version</code>)<br>
+          <strong>日本語:</strong> 同時注文による売り越しを防ぐ悲観的ロック（<code>SELECT ... FOR UPDATE</code>）と在庫更新の楽観的ロック（<code>@Version</code>）</li>
+      <li><strong>English:</strong> Product catalog with real-time stock levels, warehouse locations, and low-stock threshold monitoring<br>
+          <strong>日本語:</strong> リアルタイムの在庫数、倉庫ロケーション情報、発注点管理を含む商品カタログ</li>
+      <li><strong>English:</strong> Transactional order placement with server-side price calculation and stock validation<br>
+          <strong>日本語:</strong> サーバー側での価格計算と在庫検証を伴うトランザクション処理による注文登録</li>
+      <li><strong>English:</strong> Order status (<code>PLACED</code> → <code>CONFIRMED</code> → <code>PROCESSING</code> → <code>SHIPPED</code> → <code>DELIVERED</code>) and pick status (<code>PENDING_PICK</code> → <code>PICKED</code> → <code>PACKED</code> → <code>SHIPPED</code>) tracking<br>
+          <strong>日本語:</strong> 注文ステータスおよびピッキング/梱包ステータスの進捗追跡</li>
+      <li><strong>English:</strong> Unified Admin & Operations dashboard with order, inventory, and low-stock overview<br>
+          <strong>日本語:</strong> 注文・在庫・低在庫状況を一元的に把握できる管理者・運用ダッシュボード</li>
+      <li><strong>English:</strong> Scheduled background job (<code>@Scheduled</code>) to detect and log low-stock products dipping below reorder level<br>
+          <strong>日本語:</strong> 低在庫商品を検知しログに記録する定期バックグラウンドジョブ</li>
+      <li><strong>English:</strong> Centralized exception handling returning sanitized, structured JSON error responses<br>
+          <strong>日本語:</strong> 整形されたエラーレスポンスを返す一元化された例外処理</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="keep-together">
+    <h2 class="section-title">6. System Architecture / システム構成</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      The frontend (React + TypeScript + Vite) communicates with the Spring Boot backend over REST APIs secured by stateless JWT authentication. The backend is organized into Controller, Service, Repository, and Entity layers, with <strong>MySQL 8</strong> as the relational data store and an in-memory H2 database for automated test suite execution.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      フロントエンド（React + TypeScript + Vite）は、ステートレスな JWT 認証で保護された REST API を介して Spring Boot バックエンドと通信します。バックエンドは Controller・Service・Repository・Entity の各層に整理されており、リレーショナルデータストアとして <strong>MySQL 8</strong> を使用し、自動テストには高速な H2 インメモリデータベースを活用しています。
+    </p>
+    <div class="flow-diagram">
+      React (TypeScript + Vite) Frontend<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      REST API / JWT Authentication Filter<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      Spring Boot Backend (Controller Layer → Service Layer with @Transactional & Concurrency Locks)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      MySQL 8 Database (Local & Cloud via Spring Data JPA / Hibernate) + H2 Database (Automated Tests)
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="keep-together">
+    <h2 class="section-title">7. Technology Stack / 技術スタック</h2>
+    <table class="tech-table">
+      <thead>
+        <tr>
+          <th style="width: 28%;">Category</th>
+          <th style="width: 72%;">Technologies Used</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Frontend</strong></td>
+          <td>React 18 / 19, TypeScript, Vite, React Router, Axios</td>
+        </tr>
+        <tr>
+          <td><strong>Backend</strong></td>
+          <td>Java 21, Spring Boot 3.3.x, Spring Data JPA, Spring Security</td>
+        </tr>
+        <tr>
+          <td><strong>Database</strong></td>
+          <td>MySQL 8 (via <code>mysql-connector-j</code> and Hibernate JPA), H2 (In-memory testing)</td>
+        </tr>
+        <tr>
+          <td><strong>Concurrency & Locking</strong></td>
+          <td>Pessimistic Write Locking (<code>PESSIMISTIC_WRITE</code>), Optimistic Locking (<code>@Version</code>)</td>
+        </tr>
+        <tr>
+          <td><strong>Authentication & RBAC</strong></td>
+          <td>Stateless JWT (jjwt 0.12.x), BCrypt, Spring Security <code>@PreAuthorize</code></td>
+        </tr>
+        <tr>
+          <td><strong>Testing Suite</strong></td>
+          <td>JUnit 5, Mockito, Spring Boot Test, MockMvc (18 automated tests)</td>
+        </tr>
+        <tr>
+          <td><strong>Containerization</strong></td>
+          <td>Docker, Docker Compose (MySQL 8 + Backend + Frontend multi-container)</td>
+        </tr>
+        <tr>
+          <td><strong>Current Deployment</strong></td>
+          <td>Backend on Render / Docker; Frontend on Vercel</td>
+        </tr>
+        <tr>
+          <td><strong>Cloud Architecture (Planned)</strong></td>
+          <td>AWS EC2 (backend hosting), AWS RDS (MySQL 8 database), AWS S3 + CloudFront (frontend distribution) — designed and documented</td>
+        </tr>
+        <tr>
+          <td><strong>Tools</strong></td>
+          <td>Git, GitHub, Maven, npm, Postman</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="keep-together">
+    <h2 class="section-title">8. Current Status & Roadmap / 現在の状況と今後の計画</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      The core order, inventory, multi-warehouse stock transfer, audit logging, and RBAC authentication flows are fully implemented, verified, and containerized with Docker Compose. A suite of 18 automated unit and integration tests verifies business logic, concurrency safety, and role enforcement. AWS cloud migration (EC2, RDS MySQL, S3/CloudFront) is designed and documented, ready for execution as the production infrastructure phase.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      注文・在庫・複数倉庫間在庫移動・監査ログ・RBAC認証の中核フローは完全に実装され、Docker Compose によるコンテナ化および動作検証が完了しています。18件の自動単体・統合テストにより業務ロジック、並行性安全性、ロール権限が厳格に検証されています。AWS クラウドへの移行（EC2、RDS MySQL、S3/CloudFront）は設計・文書化済みであり、本番インフラフェーズとして展開可能な状態です。
+    </p>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="keep-together">
+    <h2 class="section-title">9. Conclusion / 結論</h2>
+    <div class="lang-title">English:</div>
+    <p>
+      FlowSync demonstrates practical, enterprise-grade application of Java/Spring Boot backend development, relational database design with MySQL 8, transactional data integrity, pessimistic locking against concurrency race conditions, inter-warehouse logistics state machines, immutable audit compliance, and React/TypeScript frontend development to a real business problem — connecting order processing with accurate, real-time multi-warehouse inventory and logistics operations.
+    </p>
+    <div class="lang-title">日本語:</div>
+    <p>
+      FlowSync は、Java/Spring Boot によるバックエンド開発、MySQL 8 によるリレーショナルデータベース設計、トランザクションデータの完全性、同時実行競合を防ぐ悲観的ロック、倉庫間物流ステータスマシン、不変の監査コンプライアンス、および React/TypeScript によるフロントエンド開発を、注文処理と正確でリアルタイムな複数倉庫在庫・物流業務という実際の業務課題に実践的かつエンタープライズ水準で適用したものです。
+    </p>
+    <p style="margin-top: 8px;">
+      <strong>GitHub Link:</strong> <a class="link" href="https://github.com/KvPradeepthi/flowsync">https://github.com/KvPradeepthi/flowsync</a>
+    </p>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="keep-together" style="margin-top: 16px;">
+    <h2 class="section-title">10. Developer Information / 開発者情報</h2>
+    <div class="developer-name">Veera Pradeepthi Kamichetty</div>
+    <div class="developer-role">Full-Stack Developer | Java / Spring Boot | React / TypeScript | MySQL | B.Tech, Aditya University</div>
+  </div>
+
+</body>
+</html>

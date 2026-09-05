@@ -54,7 +54,7 @@ class AuthServiceTest {
     @DisplayName("OtpService generates valid 6-digit OTP and verifies it correctly")
     void testOtpGenerationAndVerification() {
         String email = "test@example.com";
-        String otp = otpService.generateAndSendOtp(email);
+        String otp = otpService.generateAndSendOtp(email).otp();
 
         assertNotNull(otp);
         assertEquals(6, otp.length());
@@ -92,10 +92,11 @@ class AuthServiceTest {
     void testSendOtpSuccess() {
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(testUser));
 
-        String otp = authService.sendPasswordResetOtp("jane@example.com");
+        OtpService.OtpDispatchResult result = authService.sendPasswordResetOtp("jane@example.com");
 
-        assertNotNull(otp);
-        assertEquals(6, otp.length());
+        assertNotNull(result);
+        assertNotNull(result.otp());
+        assertEquals(6, result.otp().length());
         verify(auditLogService, atLeastOnce()).log(any(), any(), eq("OTP_REQUESTED"), any(), any(), any(), any(), any());
     }
 
@@ -120,7 +121,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.encode("newSecret123")).thenReturn("encoded_new_secret");
 
-        String otp = otpService.generateAndSendOtp("jane@example.com");
+        String otp = otpService.generateAndSendOtp("jane@example.com").otp();
 
         PasswordResetRequest request = new PasswordResetRequest();
         request.setEmail("jane@example.com");

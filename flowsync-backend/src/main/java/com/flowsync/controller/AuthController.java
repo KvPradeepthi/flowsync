@@ -42,13 +42,16 @@ public class AuthController {
      * Generate and dispatch a 6-digit verification OTP to the user's email.
      */
     @PostMapping("/send-otp")
-    public ResponseEntity<java.util.Map<String, String>> sendOtp(
+    public ResponseEntity<java.util.Map<String, Object>> sendOtp(
             @Valid @RequestBody com.flowsync.dto.request.OtpSendRequest request) {
-        String demoOtp = authService.sendPasswordResetOtp(request.getEmail());
-        return ResponseEntity.ok(java.util.Map.of(
-                "message", "Verification code has been dispatched to your email.",
-                "demoOtp", demoOtp
-        ));
+        com.flowsync.service.OtpService.OtpDispatchResult result = authService.sendPasswordResetOtp(request.getEmail());
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("message", result.message());
+        response.put("emailSent", result.emailSent());
+        if (!result.emailSent()) {
+            response.put("demoOtp", result.otp());
+        }
+        return ResponseEntity.ok(response);
     }
 
     /**

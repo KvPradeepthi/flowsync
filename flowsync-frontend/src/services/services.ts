@@ -11,7 +11,7 @@ export const authService = {
     api.post<AuthResponse>('/api/auth/login', { email, password }),
 
   sendOtp: (email: string) =>
-    api.post<{ message: string; demoOtp?: string }>('/api/auth/send-otp', { email }),
+    api.post<{ message: string; emailSent?: boolean; demoOtp?: string }>('/api/auth/send-otp', { email }),
 
   resetPassword: (email: string, otp: string, newPassword: string) =>
     api.post<{ message: string }>('/api/auth/reset-password', { email, otp, newPassword }),

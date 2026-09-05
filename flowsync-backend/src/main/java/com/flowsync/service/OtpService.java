@@ -28,10 +28,12 @@ public class OtpService {
     // In-memory thread-safe OTP store
     private final Map<String, OtpEntry> otpStore = new ConcurrentHashMap<>();
 
+    public record OtpDispatchResult(String otp, boolean emailSent, String message) {}
+
     /**
      * Generate, store, and send a 6-digit OTP to the recipient email.
      */
-    public String generateAndSendOtp(String email) {
+    public OtpDispatchResult generateAndSendOtp(String email) {
         String normalizedEmail = email.trim().toLowerCase();
         String otp = String.format("%06d", random.nextInt(1_000_000));
         Instant expiresAt = Instant.now().plusSeconds(OTP_VALIDITY_SECONDS);
@@ -44,19 +46,36 @@ public class OtpService {
         if (mailSender != null) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
+                if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl
+                        && impl.getUsername() != null && !impl.getUsername().isBlank()) {
+                    message.setFrom(impl.getUsername());
+                }
                 message.setTo(normalizedEmail);
-                message.setSubject("FlowSync — Password Reset OTP Verification");
-                message.setText("Hello,\n\nYour FlowSync password reset verification code is: " + otp + 
-                        "\n\nThis code will expire in 10 minutes. If you did not request this, please ignore this email.\n\n— FlowSync Security Team");
+                message.setSubject("FlowSync — Password Reset Verification Code");
+                message.setText("Hello,\n\n"
+                        + "You requested to reset your password on FlowSync.\n\n"
+                        + "Your 6-digit verification code is:\n\n"
+                        + "    " + otp + "\n\n"
+                        + "This verification code will expire in 10 minutes.\n\n"
+                        + "If you did not make this request, please disregard this email.\n\n"
+                        + "Best regards,\n"
+                        + "FlowSync Security Team");
+
                 mailSender.send(message);
                 emailSent = true;
-                log.info("[OTP Service] OTP email dispatched successfully to {}", normalizedEmail);
+                log.info("[OTP Service] OTP email dispatched successfully via SMTP to {}", normalizedEmail);
             } catch (Exception e) {
-                log.warn("[OTP Service] Could not send live email (SMTP not configured or rejected): {}. Falling back to demo mode.", e.getMessage());
+                log.warn("[OTP Service] Could not send live email to {}: {}", normalizedEmail, e.getMessage());
             }
+        } else {
+            log.warn("[OTP Service] JavaMailSender is not initialized (SMTP host not specified).");
         }
 
-        return otp;
+        String message = emailSent
+                ? "A 6-digit verification code has been dispatched to your email inbox (" + normalizedEmail + "). Please check your inbox or spam folder."
+                : "A verification code has been generated.";
+
+        return new OtpDispatchResult(otp, emailSent, message);
     }
 
     /**

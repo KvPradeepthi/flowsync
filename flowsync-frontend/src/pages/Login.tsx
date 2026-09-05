@@ -56,9 +56,12 @@ export default function Login() {
     try {
       const res = await authService.sendOtp(resetEmail.trim());
       setSuccess(res.data?.message || 'Verification code sent to your email.');
-      if (res.data?.demoOtp) {
+      if (res.data?.emailSent) {
+        setDemoOtpHint(''); // Code sent to real inbox, not revealed on screen
+        setOtp('');
+      } else if (res.data?.demoOtp) {
         setDemoOtpHint(res.data.demoOtp);
-        setOtp(res.data.demoOtp); // Auto-fill for reviewer convenience
+        setOtp(res.data.demoOtp); // Auto-fill for reviewer convenience in demo mode
       }
       setOtpStep(2);
     } catch (err: any) {

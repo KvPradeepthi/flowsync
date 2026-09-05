@@ -86,11 +86,11 @@ public class AuthService {
     /**
      * Generate and dispatch a secure 6-digit OTP to the registered account.
      */
-    public String sendPasswordResetOtp(String email) {
+    public OtpService.OtpDispatchResult sendPasswordResetOtp(String email) {
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new IllegalStateException("No account found registered with email: " + email));
 
-        String otp = otpService.generateAndSendOtp(user.getEmail());
+        OtpService.OtpDispatchResult result = otpService.generateAndSendOtp(user.getEmail());
         auditLogService.log(
                 user.getId(),
                 user.getEmail(),
@@ -99,9 +99,9 @@ public class AuthService {
                 user.getId(),
                 null,
                 null,
-                "Password reset OTP was generated"
+                "Password reset OTP was generated. Live email sent: " + result.emailSent()
         );
-        return otp;
+        return result;
     }
 
     /**

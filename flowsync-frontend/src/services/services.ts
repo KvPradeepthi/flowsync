@@ -10,8 +10,14 @@ export const authService = {
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/api/auth/login', { email, password }),
 
-  resetPassword: (email: string, newPassword: string) =>
-    api.post<{ message: string }>('/api/auth/reset-password', { email, newPassword }),
+  sendOtp: (email: string) =>
+    api.post<{ message: string; demoOtp?: string }>('/api/auth/send-otp', { email }),
+
+  resetPassword: (email: string, otp: string, newPassword: string) =>
+    api.post<{ message: string }>('/api/auth/reset-password', { email, otp, newPassword }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<{ message: string }>('/api/auth/change-password', { currentPassword, newPassword }),
 };
 
 // ─── Products ─────────────────────────────────────────────────────────────

@@ -45,13 +45,14 @@ public class AuthController {
     public ResponseEntity<java.util.Map<String, Object>> sendOtp(
             @Valid @RequestBody com.flowsync.dto.request.OtpSendRequest request) {
         com.flowsync.service.OtpService.OtpDispatchResult result = authService.sendPasswordResetOtp(request.getEmail());
-        java.util.Map<String, Object> response = new java.util.HashMap<>();
-        response.put("message", result.message());
-        response.put("emailSent", result.emailSent());
         if (!result.emailSent()) {
-            response.put("demoOtp", result.otp());
+            throw new IllegalStateException("Failed to deliver verification email to " + request.getEmail()
+                    + ". Please verify that mail server credentials (MAIL_USERNAME and MAIL_PASSWORD) are configured in the environment.");
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(java.util.Map.of(
+                "message", result.message(),
+                "emailSent", true
+        ));
     }
 
     /**

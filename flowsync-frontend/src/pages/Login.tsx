@@ -14,7 +14,6 @@ export default function Login() {
   // Reset password fields
   const [resetEmail, setResetEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [demoOtpHint, setDemoOtpHint] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -55,14 +54,8 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await authService.sendOtp(resetEmail.trim());
-      setSuccess(res.data?.message || 'Verification code sent to your email.');
-      if (res.data?.emailSent) {
-        setDemoOtpHint(''); // Code sent to real inbox, not revealed on screen
-        setOtp('');
-      } else if (res.data?.demoOtp) {
-        setDemoOtpHint(res.data.demoOtp);
-        setOtp(res.data.demoOtp); // Auto-fill for reviewer convenience in demo mode
-      }
+      setSuccess(res.data?.message || 'A 6-digit verification code has been dispatched to your email.');
+      setOtp('');
       setOtpStep(2);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to send OTP. Please check the email address.');
@@ -77,7 +70,7 @@ export default function Login() {
     setSuccess('');
 
     if (!otp.trim() || otp.trim().length !== 6) {
-      setError('Please enter a valid 6-digit verification code.');
+      setError('Please enter the 6-digit verification code received in your email.');
       return;
     }
 
@@ -100,7 +93,6 @@ export default function Login() {
       setOtp('');
       setNewPassword('');
       setConfirmPassword('');
-      setDemoOtpHint('');
       setTimeout(() => {
         setMode('login');
         setOtpStep(1);
@@ -294,11 +286,10 @@ export default function Login() {
                       Change
                     </button>
                   </div>
-                  {demoOtpHint && (
-                    <div style={{ marginTop: '0.4rem', color: 'var(--warning)', fontSize: '0.8rem' }}>
-                      🔑 <strong>Demo Mode OTP:</strong> {demoOtpHint} (Auto-filled)
-                    </div>
-                  )}
+                  <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span>📬</span>
+                    <span>A 6-digit verification code was sent to this email. Please check your inbox or spam.</span>
+                  </div>
                 </div>
 
                 <div className="form-group">

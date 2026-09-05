@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useAuth } from './context/AppContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -28,7 +28,7 @@ function AppRoutes() {
   const { user } = useAuth();
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Navbar />
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
@@ -67,7 +67,7 @@ function AppRoutes() {
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

@@ -9,6 +9,9 @@ export const authService = {
 
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/api/auth/login', { email, password }),
+
+  resetPassword: (email: string, newPassword: string) =>
+    api.post<{ message: string }>('/api/auth/reset-password', { email, newPassword }),
 };
 
 // ─── Products ─────────────────────────────────────────────────────────────

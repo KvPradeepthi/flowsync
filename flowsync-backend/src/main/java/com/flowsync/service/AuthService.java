@@ -34,6 +34,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -79,5 +80,26 @@ public class AuthService {
                 .name(user.getName())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    @Transactional
+    public void resetPassword(com.flowsync.dto.request.PasswordResetRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalStateException("No account registered with email: " + request.getEmail()));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        auditLogService.log(
+                user.getId(),
+                user.getEmail(),
+                "PASSWORD_RESET",
+                "User",
+                user.getId(),
+                "PROTECTED",
+                "PROTECTED",
+                "Password was reset successfully"
+        );
+        log.info("Password reset successfully for user: {}", user.getEmail());
     }
 }

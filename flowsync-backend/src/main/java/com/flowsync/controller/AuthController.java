@@ -36,4 +36,15 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    /**
+     * POST /api/auth/reset-password
+     * Reset password for an existing account.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<java.util.Map<String, String>> resetPassword(
+            @Valid @RequestBody com.flowsync.dto.request.PasswordResetRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(java.util.Map.of("message", "Password has been reset successfully. You can now sign in."));
+    }
 }

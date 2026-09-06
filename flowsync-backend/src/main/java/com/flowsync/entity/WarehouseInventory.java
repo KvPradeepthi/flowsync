@@ -47,9 +47,6 @@ public class WarehouseInventory {
     @Column(length = 50)
     private String rackBinLocation;
 
-    @Version
-    private Long version;
-
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

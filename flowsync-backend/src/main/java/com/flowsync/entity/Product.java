@@ -69,9 +69,6 @@ public class Product {
     @Builder.Default
     private Boolean active = true;
 
-    @Version
-    private Long version;
-
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

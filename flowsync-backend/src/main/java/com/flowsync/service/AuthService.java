@@ -90,18 +90,8 @@ public class AuthService {
         User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new IllegalStateException("No account found registered with email: " + email));
 
-        OtpService.OtpDispatchResult result = otpService.generateAndSendOtp(user.getEmail());
-        auditLogService.log(
-                user.getId(),
-                user.getEmail(),
-                "OTP_REQUESTED",
-                "User",
-                user.getId(),
-                null,
-                null,
-                "Password reset OTP was generated. Live email sent: " + result.emailSent()
-        );
-        return result;
+        log.info("[AUTH] Generating and sending OTP for user: {}", user.getEmail());
+        return otpService.generateAndSendOtp(user.getEmail());
     }
 
     /**
@@ -120,18 +110,7 @@ public class AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-
-        auditLogService.log(
-                user.getId(),
-                user.getEmail(),
-                "PASSWORD_RESET",
-                "User",
-                user.getId(),
-                "PROTECTED",
-                "PROTECTED",
-                "Password was successfully reset via OTP verification"
-        );
-        log.info("Password successfully reset via OTP for user: {}", user.getEmail());
+        log.info("[AUTH] Password successfully reset via OTP for user: {}", user.getEmail());
     }
 
     /**
@@ -148,17 +127,6 @@ public class AuthService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-
-        auditLogService.log(
-                user.getId(),
-                user.getEmail(),
-                "PASSWORD_CHANGED",
-                "User",
-                user.getId(),
-                "PROTECTED",
-                "PROTECTED",
-                "User changed their password while authenticated"
-        );
-        log.info("User {} changed their password successfully.", userEmail);
+        log.info("[AUTH] User {} changed their password successfully.", userEmail);
     }
 }

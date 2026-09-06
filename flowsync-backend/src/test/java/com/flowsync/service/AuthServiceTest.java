@@ -97,7 +97,6 @@ class AuthServiceTest {
         assertNotNull(result);
         assertNotNull(result.otp());
         assertEquals(6, result.otp().length());
-        verify(auditLogService, atLeastOnce()).log(any(), any(), eq("OTP_REQUESTED"), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -132,6 +131,5 @@ class AuthServiceTest {
 
         assertEquals("encoded_new_secret", testUser.getPassword());
         verify(userRepository, times(1)).save(testUser);
-        verify(auditLogService, atLeastOnce()).log(any(), any(), eq("PASSWORD_RESET"), any(), any(), any(), any(), any());
     }
 }

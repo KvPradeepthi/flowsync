@@ -49,6 +49,8 @@ public class OtpService {
                 if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl
                         && impl.getUsername() != null && !impl.getUsername().isBlank()) {
                     message.setFrom(impl.getUsername());
+                } else {
+                    message.setFrom("deepthikamichetty336@gmail.com");
                 }
                 message.setTo(normalizedEmail);
                 message.setSubject("FlowSync — Password Reset Verification Code");

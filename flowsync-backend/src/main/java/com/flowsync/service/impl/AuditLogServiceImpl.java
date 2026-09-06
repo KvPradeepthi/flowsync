@@ -24,7 +24,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final AuditLogRepository auditLogRepository;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(Long userId,
                     String userEmail,
                     String action,
@@ -33,20 +33,23 @@ public class AuditLogServiceImpl implements AuditLogService {
                     String oldValue,
                     String newValue,
                     String details) {
-        AuditLog entry = AuditLog.builder()
-                .userId(userId)
-                .userEmail(userEmail != null ? userEmail : "SYSTEM")
-                .action(action)
-                .entityType(entityType)
-                .entityId(entityId)
-                .oldValue(oldValue)
-                .newValue(newValue)
-                .details(details)
-                .build();
+        try {
+            AuditLog entry = AuditLog.builder()
+                    .userId(userId)
+                    .userEmail(userEmail != null ? userEmail : "SYSTEM")
+                    .action(action)
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .oldValue(oldValue)
+                    .newValue(newValue)
+                    .details(details)
+                    .build();
 
-        auditLogRepository.save(entry);
-        log.info("[AUDIT] Action: {} on {}:{} by {} (Old: {}, New: {})",
-                action, entityType, entityId, userEmail, oldValue, newValue);
+            auditLogRepository.save(entry);
+            log.info("[AUDIT] Action: {} on {}:{} by {}", action, entityType, entityId, userEmail);
+        } catch (Exception e) {
+            log.warn("[AUDIT] Could not record audit log: {}", e.getMessage());
+        }
     }
 
     @Override

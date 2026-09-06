@@ -122,16 +122,20 @@ public class OrderServiceImpl implements OrderService {
 
         Order saved = orderRepository.save(order);
 
-        auditLogService.log(
-                user.getId(),
-                userEmail,
-                "ORDER_PLACED",
-                "ORDER",
-                saved.getId(),
-                null,
-                "TOTAL: " + totalAmount + ", STATUS: PLACED",
-                "Order #" + saved.getId() + " placed with " + orderItems.size() + " item(s)"
-        );
+        try {
+            auditLogService.log(
+                    user.getId(),
+                    userEmail,
+                    "ORDER_PLACED",
+                    "ORDER",
+                    saved.getId(),
+                    null,
+                    "TOTAL: " + totalAmount + ", STATUS: PLACED",
+                    "Order #" + saved.getId() + " placed with " + orderItems.size() + " item(s)"
+            );
+        } catch (Exception e) {
+            log.warn("[OrderService] Could not record audit log: {}", e.getMessage());
+        }
 
         log.info("Order #{} placed by {} — total: {}", saved.getId(), userEmail, totalAmount);
 
@@ -196,16 +200,20 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(newStatus);
         Order updated = orderRepository.save(order);
 
-        auditLogService.log(
-                null,
-                "SYSTEM",
-                "ORDER_STATUS_UPDATE",
-                "ORDER",
-                updated.getId(),
-                oldStatus.name(),
-                newStatus.name(),
-                "Order status updated from " + oldStatus + " to " + newStatus
-        );
+        try {
+            auditLogService.log(
+                    null,
+                    "SYSTEM",
+                    "ORDER_STATUS_UPDATE",
+                    "ORDER",
+                    updated.getId(),
+                    oldStatus.name(),
+                    newStatus.name(),
+                    "Order status updated from " + oldStatus + " to " + newStatus
+            );
+        } catch (Exception e) {
+            log.warn("[OrderService] Could not record audit log: {}", e.getMessage());
+        }
 
         log.info("Order #{} status → {}", id, newStatus);
         return OrderResponse.from(updated);
@@ -260,16 +268,20 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(OrderStatus.CANCELLED);
         Order cancelled = orderRepository.save(order);
 
-        auditLogService.log(
-                null,
-                userEmail,
-                "ORDER_CANCELLED",
-                "ORDER",
-                cancelled.getId(),
-                previousStatus.name(),
-                "CANCELLED",
-                "Order #" + id + " cancelled; inventory restored"
-        );
+        try {
+            auditLogService.log(
+                    null,
+                    userEmail,
+                    "ORDER_CANCELLED",
+                    "ORDER",
+                    cancelled.getId(),
+                    previousStatus.name(),
+                    "CANCELLED",
+                    "Order #" + id + " cancelled; inventory restored"
+            );
+        } catch (Exception e) {
+            log.warn("[OrderService] Could not record audit log: {}", e.getMessage());
+        }
 
         log.info("Order #{} CANCELLED — inventory restored", id);
 

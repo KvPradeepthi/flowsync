@@ -6,6 +6,7 @@ import com.flowsync.repository.AuditLogRepository;
 import com.flowsync.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final AuditLogRepository auditLogRepository;
 
     @Override
+    @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(Long userId,
                     String userEmail,

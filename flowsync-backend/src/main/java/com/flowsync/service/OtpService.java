@@ -3,10 +3,15 @@ package com.flowsync.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Map;
@@ -19,6 +24,12 @@ public class OtpService {
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
+
+    @Value("${resend.api.key:${RESEND_API_KEY:}}")
+    private String resendApiKey;
+
+    @Value("${brevo.api.key:${BREVO_API_KEY:}}")
+    private String brevoApiKey;
 
     private static final long OTP_VALIDITY_SECONDS = 600; // 10 minutes
     private final SecureRandom random = new SecureRandom();
@@ -41,9 +52,20 @@ public class OtpService {
         otpStore.put(normalizedEmail, new OtpEntry(otp, expiresAt));
         log.info("[OTP Service] Generated OTP for {}: {}", normalizedEmail, otp);
 
-        // Send email via JavaMailSender if available
         boolean emailSent = false;
-        if (mailSender != null) {
+
+        // 1. Try Resend HTTP API (Port 443 — not blocked by Render)
+        if (resendApiKey != null && !resendApiKey.isBlank()) {
+            emailSent = sendViaResend(normalizedEmail, otp);
+        }
+
+        // 2. Try Brevo HTTP API (Port 443 — not blocked by Render)
+        if (!emailSent && brevoApiKey != null && !brevoApiKey.isBlank()) {
+            emailSent = sendViaBrevo(normalizedEmail, otp);
+        }
+
+        // 3. Fallback to standard SMTP if configured
+        if (!emailSent && mailSender != null) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 if (mailSender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl
@@ -67,10 +89,8 @@ public class OtpService {
                 emailSent = true;
                 log.info("[OTP Service] OTP email dispatched successfully via SMTP to {}", normalizedEmail);
             } catch (Exception e) {
-                log.warn("[OTP Service] Could not send live email to {}: {}", normalizedEmail, e.getMessage());
+                log.warn("[OTP Service] Could not send live email via SMTP to {}: {}", normalizedEmail, e.getMessage());
             }
-        } else {
-            log.warn("[OTP Service] JavaMailSender is not initialized (SMTP host not specified).");
         }
 
         String message = emailSent
@@ -78,6 +98,48 @@ public class OtpService {
                 : "A verification code has been generated.";
 
         return new OtpDispatchResult(otp, emailSent, message);
+    }
+
+    private boolean sendViaResend(String recipient, String otp) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            String json = "{\"from\":\"FlowSync <onboarding@resend.dev>\",\"to\":[\"" + recipient + "\"],\"subject\":\"FlowSync — Password Reset Verification Code\",\"html\":\"<p>Hello,</p><p>Your 6-digit FlowSync verification code is: <strong style='font-size:22px;letter-spacing:4px;'>" + otp + "</strong></p><p>This code expires in 10 minutes.</p>\"}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Authorization", "Bearer " + resendApiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log.info("[Resend API] Status: {}, Response: {}", response.statusCode(), response.body());
+            return response.statusCode() >= 200 && response.statusCode() < 300;
+        } catch (Exception e) {
+            log.error("[Resend API] Failed to send email: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean sendViaBrevo(String recipient, String otp) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            String json = "{\"sender\":{\"name\":\"FlowSync\",\"email\":\"deepthikamichetty336@gmail.com\"},\"to\":[{\"email\":\"" + recipient + "\"}],\"subject\":\"FlowSync — Password Reset Verification Code\",\"htmlContent\":\"<p>Hello,</p><p>Your 6-digit FlowSync verification code is: <strong style='font-size:22px;letter-spacing:4px;'>" + otp + "</strong></p><p>This code expires in 10 minutes.</p>\"}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", brevoApiKey.trim())
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            log.info("[Brevo API] Status: {}, Response: {}", response.statusCode(), response.body());
+            return response.statusCode() >= 200 && response.statusCode() < 300;
+        } catch (Exception e) {
+            log.error("[Brevo API] Failed to send email: {}", e.getMessage());
+            return false;
+        }
     }
 
     /**
